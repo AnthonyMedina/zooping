@@ -1,16 +1,28 @@
 const axios = require('axios');
+const { writeFileSync } = require('fs');
 
 const { BASE_URL, ZOOPLA_API_KEY } = require('./config');
 const { formatListings } = require('./utils');
+const { previousListingIds } = require('./cache.json');
 
-const getProperties = async () => {
+const updateCache = listings => {
+  const listingIds = previousListingIds.concat(
+    listings.map(listing => listing.listing_id)
+  );
+  writeFileSync(
+    './cache.json',
+    JSON.stringify({ previousListingIds: listingIds }, null, '  ')
+  );
+};
+
+const getNewProperties = async area => {
   const { data } = await axios({
     method: 'get',
     url: `${BASE_URL}/property_listings.js`,
     responseType: 'application/json',
     params: {
       api_key: ZOOPLA_API_KEY,
-      area: 'Chorlton Cum Hardy, Greater Manchester',
+      area,
       order_by: 'age',
       maximum_price: 250000,
       minimum_beds: 2,
@@ -19,9 +31,19 @@ const getProperties = async () => {
       property_type: 'houses'
     }
   });
-  // console.log(data);
-  const properties = formatListings(data.listing);
-  console.log(properties);
+
+  const listings = data.listing.filter(
+    property => !previousListingIds.includes(property.listing_id)
+  );
+
+  updateCache(listings);
+
+  return formatListings(listings);
 };
 
-getProperties();
+const logNewProperties = async () => {
+  const newProperties = await getNewProperties('Chorlton Cum Hardy');
+  console.log(newProperties);
+};
+
+logNewProperties();
