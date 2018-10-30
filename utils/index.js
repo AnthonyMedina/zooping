@@ -8,10 +8,12 @@ exports.formatListings = listings => {
       latitude,
       num_bedrooms,
       short_description,
-      first_published_date
+      first_published_date,
+      details_url
     }) => ({
       displayable_address,
       price,
+      details_url,
       price_change:
         price_change.reduce((acc, { percent }) => {
           if (+percent[0] !== 0) {
