@@ -9,6 +9,7 @@
   "author": "Anthony Medina",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.18.0"
+    "axios": "^0.18.0",
+    "twilio": "^3.23.2"
   }
 }
